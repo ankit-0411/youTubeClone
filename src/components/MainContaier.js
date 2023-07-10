@@ -1,6 +1,7 @@
 import React from "react";
-import ButtonsList from "../ButtonsList";
+
 import VideoContainer from "./VideoContainer";
+import ButtonsList from "./ButtonsList";
 
 function MainContaier() {
   return (

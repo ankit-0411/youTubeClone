@@ -11,7 +11,7 @@ function SideBar() {
       <ul>
         <li>🎵 Music</li>
         <li>🏋🏼‍♂️ Sports</li>
-        <li>🎬 Movies</li>
+        <li>🎬 Movie</li>
       </ul>
       <h1 className="font-bold py-5">Music</h1>
       <ul>
