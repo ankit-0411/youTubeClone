@@ -1,12 +1,56 @@
-import React from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleMenu } from "../utils/appSlice";
+import newLogo from "./img/NewLogo.png";
+import { Search_API_QUERY } from "../utils/constant";
+import { cacheResult } from "../utils/searchSlice";
 
 function Head() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions,setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+
+
+// use the store data
+  const searchCache = useSelector((store) => store.search);
+
+
   const dispatch = useDispatch();
   const toggleHandler = () => {
     dispatch(toggleMenu());
   };
+
+
+  useEffect(() => {
+    
+    const timer = setTimeout(() => {
+      if (searchCache[searchQuery]) {
+        setSuggestions(searchCache[searchQuery]);
+      } else {
+        getSearchSugsestions();
+      }
+    }, 200);
+
+   return (()=>clearTimeout(timer))
+
+    
+  }, [searchQuery]);
+
+  const  getSearchSugsestions = async () => {
+    console.log("API CALL");
+    const data = await fetch(Search_API_QUERY + searchQuery);
+    const json = await data.json();
+    setSuggestions(json[1]);
+     // update cache
+     dispatch(
+      cacheResult({
+        [searchQuery]: json[1],
+      })
+    );
+  };
+  
+
   return (
     <div className="grid grid-flow-col p-5 m-2 shadow-lg">
       <div
@@ -20,20 +64,69 @@ function Head() {
           src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hamburger_icon.svg/1024px-Hamburger_icon.svg.png"
         />
         <img
-          className="h-8 mx-2"
+          className="h-14 mx-2 w-11 pb-[16px] w-[100px]"
           alt="Logo"
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Logo_of_YouTube_%282015-2017%29.svg/2560px-Logo_of_YouTube_%282015-2017%29.svg.png"
+          src={newLogo}
         />
       </div>
-      <div className="col-span-10 text-center">
+      <div className="col-span-10 px-10">
+        <div>
         <input
           className="w-1/2 border  border-gray-400 p-2 rounded-l-full"
           type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onFocus={() => setShowSuggestions(true)}
+          onBlur={() => setShowSuggestions(false)}
         />
         <button className="border  border-gray-500 py-2 px-5 rounded-r-full bg-gray-100">
           🔍
         </button>
+        
+        {showSuggestions && (
+         <div className="fixed bg-white py-2 px-2 w-[37rem] shadow-lg rounded-lg border border-gray-100">
+           <ul>
+             {suggestions.map((s) => (
+               <li key={s} className="py-2 px-3 shadow-sm hover:bg-gray-100">
+                 🔍 {s}
+               </li>
+             ))}
+           </ul>
+         </div>
+       )}
+    
+        </div>
       </div>
+    
+       {/* <div className="col-span-10 px-10">
+       <div>
+         <input
+           className="px-5 w-1/2 border border-gray-400 p-2 rounded-l-full"
+           type="text"
+           value={searchQuery}
+           onChange={(e) => setSearchQuery(e.target.value)}
+           onFocus={() => setShowSuggestions(true)}
+           onBlur={() => setShowSuggestions(false)}
+         />
+         <button className="border border-gray-400 px-5 py-2 rounded-r-full bg-gray-100">
+           🔍
+         </button>
+       </div>
+       {showSuggestions && (
+         <div className="fixed bg-white py-2 px-2 w-[37rem] shadow-lg rounded-lg border border-gray-100">
+           <ul>
+             {suggestions.map((s) => (
+               <li key={s} className="py-2 px-3 shadow-sm hover:bg-gray-100">
+                 🔍 {s}
+               </li>
+             ))}
+           </ul>
+         </div>
+       )}
+     </div> */}
+   
+
+
       <img
         className="h-8 col-span-1"
         alt="User_icon"
